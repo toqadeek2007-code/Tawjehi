@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMAD Cloze Flashcards Generator</title>
+    <style>
+        :root {
+            --teal-950: #042424;
+            --teal-900: #063232;
+            --teal-800: #0a4a4e;
+            --teal-700: #0d6468;
+            --teal-600: #108590;
+            --teal-500: #14a8b4;
+            --teal-400: #3ec4d0;
+            --teal-300: #7ddde6;
+            --teal-100: #d4f5f8;
+            --teal-50: #edfbfc;
+            --gold: #c9991a;
+            --gold-light: #f0c842;
+            --bg: #f0f7f8;
+            --surface: #ffffff;
+            --border: #cce4e7;
+            --text: #0f2527;
+            --text-2: #3d5a5c;
+            --text-3: #6e8e91;
+            --radius: 14px;
+            --radius-sm: 8px;
+            --shadow: 0 2px 12px rgba(10, 74, 78, .06);
+            --shadow-lg: 0 12px 32px rgba(10, 74, 78, .12);
+            --tr: .2s ease;
+            --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            transition: background .3s, color .3s;
+        }
+
+        .dark-mode {
+            --bg: #0f1a1b;
+            --surface: #1a2a2c;
+            --border: #2a3a3c;
+            --text: #e0e8e9;
+            --text-2: #b0c0c2;
+            --text-3: #7a8a8c;
+            --teal-50: #0a2a2c;
+            --teal-100: #0d3a3e;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        .site-banner {
+            width: 100%;
+            background: linear-gradient(135deg, var(--teal-900) 0%, var(--teal-700) 50%, var(--teal-800) 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 12px 24px;
+            box-shadow: 0 4px 20px rgba(6, 50, 50, .2);
+            z-index: 100;
+        }
+
+        .banner-logo {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: white;
+            padding: 4px;
+            object-fit: contain;
+        }
+
+        .banner-text {
+            text-align: center;
+        }
+
+        .banner-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            margin: 0;
+        }
+        .banner-title span { color: var(--gold-light); }
+        .banner-tagline { font-size: 10px; color: rgba(255, 255, 255, .6); letter-spacing: 2px; margin-top: 2px; }
+
+        .banner-badge {
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, .8);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .top-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 0 20px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: var(--radius-sm);
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: var(--text-3);
+            font-weight: 500;
+        }
+        .breadcrumb b { color: var(--teal-700); }
+        .breadcrumb .sep { color: var(--border); padding: 0 4px; }
+
+        .dark-mode-toggle { cursor: pointer; background: var(--bg); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); font-size: 16px; }
+
+        .workspace-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex: 1;
+            min-height: 550px;
+        }
+
+        @media (max-width: 900px) {
+            .workspace-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .workspace-panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--teal-50) 0%, rgba(255,255,255,0) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--teal-950);
+        }
+
+        .panel-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 340px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            font-size: 13px;
+            line-height: 1.8;
+            resize: none;
+            background: #fafcfc;
+            color: var(--text);
+            outline: none;
+            transition: var(--tr);
+            font-family: monospace;
+            text-align: right;
+        }
+        textarea:focus {
+            border-color: var(--teal-500);
+            background: #fff;
+        }
+
+        .interactive-workspace-area {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            background: #fafcfc;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 420px;
+        }
+
+        .cloze-paragraph-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            line-height: 2;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .cloze-word {
+            cursor: pointer;
+            padding: 1px 4px;
+            margin: 0 1px;
+            border-radius: 3px;
+            transition: all 0.15s ease;
+            display: inline-block;
+        }
+        .cloze-word:hover {
+            background: var(--teal-100);
+            color: var(--teal-900);
+        }
+
+        .cloze-word.hidden-cloze {
+            background: var(--gold);
+            color: white;
+            font-weight: bold;
+            border-bottom: 2px solid #b38210;
+            box-shadow: 0 2px 5px rgba(201, 153, 26, 0.3);
+        }
+
+        .helper-text {
+            font-size: 11px;
+            color: var(--teal-700);
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .empty-state-text {
+            color: var(--text-3);
+            text-align: center;
+            font-style: italic;
+            padding-top: 40px;
+            font-size: 12px;
+        }
+
+        .counter-badge {
+            background: var(--teal-50);
+            border: 1px solid var(--teal-100);
+            color: var(--teal-800);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status-message {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-2);
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 12px 0;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--tr);
+            font-family: var(--font-body);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--teal-700), var(--teal-600));
+            color: white;
+            width: 100%;
+            box-shadow: 0 3px 10px rgba(13, 100, 104, .2);
+        }
+        .btn-primary:hover { transform: translateY(-1px); background: var(--teal-800); }
+        .btn-sm { padding: 6px 12px; font-size: 11px; }
+        .btn-accent { background: var(--gold); color: white; }
+        .btn-accent:hover { background: #b38210; }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-2);
+            margin-bottom: 5px;
+            display: block;
+            text-align: right;
+        }
+
+        /* قسم التوقيع في الأسفل والمعدل بناء على طلب المستخدمة */
+        .signature {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-3);
+        }
+        .sig-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+        .sig-name {
+            font-size: 14px;
+            color: var(--gold);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .sig-user {
+            font-size: 11px;
+            color: var(--teal-600);
+            font-weight: 600;
+            margin-top: 4px;
+            font-style: italic;
+            letter-spacing: 0.5px;
+        }
+        .sig-sub {
+            font-size: 9px;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="site-banner">
+    <img src="https://i.postimg.cc/PvbXdSPg/logo.png" alt="AMAD" class="banner-logo">
+    <div class="banner-text">
+        <div class="banner-title">AMAD <span>Cloze</span> Generator</div>
+        <div class="banner-tagline">Advanced Cloze Deletion Tool</div>
+    </div>
+    <div class="banner-badge"><span class="pulse-dot"></span> Single-Format Text Export</div>
+</div>
+
+<div class="main-content">
+    <div class="top-bar">
+        <div class="breadcrumb">AMAD <span class="sep">›</span> <b>Cloze Flashcard Editor</b></div>
+        <span class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">🌓</span>
+    </div>
+
+    <div class="workspace-container">
+        
+        <!-- الشاشة اليسرى: شاشة العمل التفاعلية -->
+        <div class="workspace-panel interactive-panel">
+            <div class="panel-header">
+                <div class="panel-title">🎯 1. شاشة التحديد والإخفاء التفاعلي</div>
+                <button class="btn btn-sm btn-accent" id="loadTextBtn">🔄 سحب النصوص وتجهيزها</button>
+            </div>
+            <div class="panel-body">
+                <div class="helper-text">💡 انقري على أي كلمة في الفقرات أدناه لإخفائها فوراً وتحويلها إلى بطاقة كلوز!</div>
+                <div id="interactiveWorkspace" class="interactive-workspace-area">
+                    <div class="empty-state-text">يرجى كتابة أو لصق النصوص في الشاشة اليمين أولاً، ثم الضغط على "سحب النصوص" للبدء بالإخفاء التفاعلي.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الشاشة اليمنى: شاشة مدخلات ومخرجات النصوص الأساسية -->
+        <div class="workspace-panel main-text-panel">
+            <div class="panel-header">
+                <div class="panel-title">📝 2. النصوص البرمجية والبطاقات</div>
+                <span class="counter-badge" id="cardCount">0 بطاقات مكتشفة</span>
+            </div>
+            <div class="panel-body">
+                <label class="form-label">اكتبي أو الصقي النصوص هنا (كل فقرة تفصل بينها مسافة فارغة تعتبر بطاقة منفصلة):</label>
+                <textarea id="rawText" placeholder="اكتبي الفقرات هنا...&#10;&#10;مثال:&#10;تتكون العظام في جسم الإنسان من نسيج ضام متخصص.&#10;&#10;الفقرة الثانية تفصلها مسافة فارغة لتصبح بطاقة ثانية تلقائياً."></textarea>
+
+                <div class="status-message" id="statusBox">المولد جاهز لاستقبال النصوص.</div>
+
+                <div class="btn-row">
+                    <button class="btn btn-primary" id="exportTxtBtn">📦 تصدير ملف أنكي النصي (.txt)</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- التوقيع المحدث متضمناً اسم Toqa بخط صغير أنيق بالإنجليزية -->
+    <div class="signature">
+        <div class="sig-label">Designed by</div>
+        <div class="sig-name">© AMAD TEAM 2026</div>
+        <div class="sig-user">Toqa Almushriqi</div>
+        <div class="sig-sub">Optimized Cloze Deletion Generator</div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const rawTextArea = document.getElementById('rawText');
+    const loadTextBtn = document.getElementById('loadTextBtn');
+    const interactiveWorkspace = document.getElementById('interactiveWorkspace');
+    const exportTxtBtn = document.getElementById('exportTxtBtn');
+    const cardCountSpan = document.getElementById('cardCount');
+    const statusBox = document.getElementById('statusBox');
+
+    let paragraphData = [];
+
+    window.toggleDarkMode = function() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('amad_cloze_single_dark', isDark);
+    };
+    if (localStorage.getItem('amad_cloze_single_dark') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+
+    loadTextBtn.addEventListener('click', function() {
+        const text = rawTextArea.value.trim();
+        if (!text) {
+            statusBox.textContent = "⚠️ يرجى إدخال أي نصوص في الشاشة اليمين أولاً.";
+            return;
+        }
+
+        const paragraphs = text.split(/
+\s*
+/).map(p => p.trim()).filter(p => p.length > 0);
+        paragraphData = [];
+        interactiveWorkspace.innerHTML = "";
+
+        paragraphs.forEach((para, pIdx) => {
+            const words = para.split(/(\s+)/);
+            paragraphData.push({
+                originalWords: words,
+                clozeIndices: new Set()
+            });
+
+            const paraBlock = document.createElement('div');
+            paraBlock.className = 'cloze-paragraph-block';
+            paraBlock.innerHTML = `<div style="font-size:10px; color:var(--text-3); margin-bottom:4px; text-align:right;">البطاقة رقم [${pIdx + 1}]</div>`;
+
+            words.forEach((word, wIdx) => {
+                if (word.trim().length === 0) {
+                    paraBlock.appendChild(document.createTextNode(word));
+                } else {
+                    const wordSpan = document.createElement('span');
+                    wordSpan.className = 'cloze-word';
+                    wordSpan.textContent = word;
+                    wordSpan.dataset.pidx = pIdx;
+                    wordSpan.dataset.widx = wIdx;
+
+                    wordSpan.addEventListener('click', function() {
+                        const currentP = parseInt(this.dataset.pidx);
+                        const currentW = parseInt(this.dataset.widx);
+
+                        if (paragraphData[currentP].clozeIndices.has(currentW)) {
+                            paragraphData[currentP].clozeIndices.delete(currentW);
+                            this.classList.remove('hidden-cloze');
+                        } else {
+                            paragraphData[currentP].clozeIndices.add(currentW);
+                            this.classList.add('hidden-cloze');
+                        }
+                        
+                        syncDataToTextArea();
+                    });
+
+                    paraBlock.appendChild(wordSpan);
+                }
+            });
+
+            interactiveWorkspace.appendChild(paraBlock);
+        });
+
+        cardCountSpan.textContent = `${paragraphs.length} بطاقات مكتشفة`;
+        statusBox.textContent = "✅ تم تحميل النصوص! انقري الآن على الكلمات المراد إخفاؤها من الشاشة اليسرى.";
+    });
+
+    function syncDataToTextArea() {
+        let finalOutputText = "";
+
+        paragraphData.forEach((para, pIdx) => {
+            let paraText = "";
+            let clozeCounter = 1;
+
+            para.originalWords.forEach((word, wIdx) => {
+                if (para.clozeIndices.has(wIdx)) {
+                    paraText += `{{c${clozeCounter}::${word}}}`;
+                    clozeCounter++;
+                } else {
+                    paraText += word;
+                }
+            });
+
+            finalOutputText += paraText + "\n\n";
+        });
+
+        rawTextArea.value = finalOutputText.trim();
+    }
+
+    exportTxtBtn.addEventListener('click', function() {
+        const text = rawTextArea.value.trim();
+        if (!text) {
+            statusBox.textContent = "⚠️ لا توجد بيانات لتصديرها. يرجى إضافة نصوص أولاً.";
+            return;
+        }
+
+        const paragraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 0);
+        let fileContent = "";
+
+        paragraphs.forEach((para) => {
+            let cleanLine = para.replace(/\t/g, " ").replace(/\n/g, "<br>");
+            fileContent += `${cleanLine}\t\n`;
+        });
+
+        const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+        const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const filename = `AMAD_Cloze_Anki_${timestamp}.txt`;
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        statusBox.textContent = `🎉 بنجاح! تم تصدير ${paragraphs.length} بطاقة كلوز داخل الملف: ${filename}`;
+    });
+})();
+</script>
+
+</body>
+</html>
