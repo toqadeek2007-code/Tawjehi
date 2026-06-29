@@ -1,551 +1,721 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMAD Cloze Flashcards Generator</title>
-    <style>
-        :root {
-            --teal-950: #042424;
-            --teal-900: #063232;
-            --teal-800: #0a4a4e;
-            --teal-700: #0d6468;
-            --teal-600: #108590;
-            --teal-500: #14a8b4;
-            --teal-400: #3ec4d0;
-            --teal-300: #7ddde6;
-            --teal-100: #d4f5f8;
-            --teal-50: #edfbfc;
-            --gold: #c9991a;
-            --gold-light: #f0c842;
-            --bg: #f0f7f8;
-            --surface: #ffffff;
-            --border: #cce4e7;
-            --text: #0f2527;
-            --text-2: #3d5a5c;
-            --text-3: #6e8e91;
-            --radius: 14px;
-            --radius-sm: 8px;
-            --shadow: 0 2px 12px rgba(10, 74, 78, .06);
-            --shadow-lg: 0 12px 32px rgba(10, 74, 78, .12);
-            --tr: .2s ease;
-            --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملتقى التوجيهي - انجليزي متقدم</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Fira+Code:wght@400;500&display=swap');
 
-        body {
-            font-family: var(--font-body);
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            margin: 0;
-            padding: 0;
-            direction: rtl;
-            transition: background .3s, color .3s;
-        }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .dark-mode {
-            --bg: #0f1a1b;
-            --surface: #1a2a2c;
-            --border: #2a3a3c;
-            --text: #e0e8e9;
-            --text-2: #b0c0c2;
-            --text-3: #7a8a8c;
-            --teal-50: #0a2a2c;
-            --teal-100: #0d3a3e;
-        }
+  :root {
+    --ink:     #1a1a2e;
+    --blue:    #1d4ed8;
+    --blue-lt: #dbeafe;
+    --green:   #166534;
+    --green-lt:#dcfce7;
+    --amber:   #92400e;
+    --amber-lt:#fef3c7;
+    --violet:  #5b21b6;
+    --violet-lt:#ede9fe;
+    --slate:   #475569;
+    --surface: #f8fafc;
+    --white:   #ffffff;
+    --border:  #e2e8f0;
+    --radius:  10px;
+  }
 
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    line-height: 1.8;
+    font-size: 16px;
+  }
 
-        .site-banner {
-            width: 100%;
-            background: linear-gradient(135deg, var(--teal-900) 0%, var(--teal-700) 50%, var(--teal-800) 100%);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            padding: 12px 24px;
-            box-shadow: 0 4px 20px rgba(6, 50, 50, .2);
-            z-index: 100;
-        }
+  /* ── HEADER ── */
+  .site-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1d4ed8 100%);
+    color: white;
+    padding: 56px 32px 48px;
+    text-align: center;
+  }
+  .site-header h1 {
+    font-size: 2.4rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .site-header .sub {
+    font-size: 1.05rem;
+    opacity: 0.75;
+    font-weight: 300;
+  }
+  .site-header .meta {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    opacity: 0.55;
+    font-style: italic;
+  }
 
-        .banner-logo {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            background: white;
-            padding: 4px;
-            object-fit: contain;
-        }
+  /* ── TOC ── */
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    background: white;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .toc a {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--slate);
+    text-decoration: none;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    transition: all 0.2s;
+  }
+  .toc a:hover { background: var(--blue); color: white; border-color: var(--blue); }
 
-        .banner-text {
-            text-align: center;
-        }
+  /* ── MAIN LAYOUT ── */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
 
-        .banner-title {
-            font-size: 24px;
-            font-weight: 800;
-            color: #fff;
-            margin: 0;
-        }
-        .banner-title span { color: var(--gold-light); }
-        .banner-tagline { font-size: 10px; color: rgba(255, 255, 255, .6); letter-spacing: 2px; margin-top: 2px; }
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 64px;
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 3px solid currentColor;
+  }
+  .section-title .num {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: currentColor;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title .num span {
+    color: white;
+    font-size: 1rem;
+    font-weight: 900;
+  }
+  .section-title h2 {
+    font-size: 1.5rem;
+    font-weight: 900;
+  }
+  .blue  { color: var(--blue); }
+  .green { color: var(--green); }
+  .amber { color: var(--amber); }
+  .violet{ color: var(--violet); }
+  .slate { color: var(--slate); }
 
-        .banner-badge {
-            background: rgba(255, 255, 255, .1);
-            border: 1px solid rgba(255, 255, 255, .2);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, .8);
-        }
+  /* ── SUBSECTION ── */
+  .sub-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 28px 0 12px;
+    padding-right: 12px;
+    border-right: 4px solid currentColor;
+  }
 
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 15px;
-        }
+  /* ── NOTE BOXES ── */
+  .note {
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-size: 0.95rem;
+    border-right: 4px solid currentColor;
+  }
+  .note.blue   { background: var(--blue-lt);   color: #1e3a8a; border-color: var(--blue); }
+  .note.green  { background: var(--green-lt);  color: #14532d; border-color: var(--green); }
+  .note.amber  { background: var(--amber-lt);  color: #78350f; border-color: #d97706; }
+  .note.violet { background: var(--violet-lt); color: #3b0764; border-color: var(--violet); }
+  .note strong { display: block; margin-bottom: 4px; font-size: 1rem; }
 
-        .top-bar {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 0 20px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-radius: var(--radius-sm);
-            margin-bottom: 15px;
-            box-shadow: var(--shadow);
-        }
+  /* ── BULLET LIST ── */
+  .list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 16px;
+  }
+  .list li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 0.95rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  .list li:last-child { border-bottom: none; }
+  .list li::before {
+    content: "";
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+  .list.blue  li { color: #1e3a8a; }
+  .list.green li { color: #14532d; }
+  .list.violet li{ color: #3b0764; }
+  .list.slate li { color: var(--slate); }
 
-        .breadcrumb {
-            font-size: 13px;
-            color: var(--text-3);
-            font-weight: 500;
-        }
-        .breadcrumb b { color: var(--teal-700); }
-        .breadcrumb .sep { color: var(--border); padding: 0 4px; }
+  /* ── TWO-COLUMN LIST ── */
+  .list-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 32px;
+  }
 
-        .dark-mode-toggle { cursor: pointer; background: var(--bg); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); font-size: 16px; }
+  /* ── GRAMMAR TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  thead tr {
+    background: var(--blue);
+    color: white;
+  }
+  thead th {
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  tbody tr:nth-child(odd)  { background: var(--blue-lt); }
+  tbody tr:nth-child(even) { background: var(--white); }
+  tbody td {
+    padding: 10px 16px;
+    vertical-align: top;
+    border-bottom: 1px solid var(--border);
+  }
+  .sentence {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: #1e3a8a;
+    direction: ltr;
+    text-align: left;
+  }
+  .func {
+    font-weight: 700;
+    color: var(--green);
+    font-size: 0.85rem;
+  }
+  .badge {
+    display: inline-block;
+    background: #fef08a;
+    color: #713f12;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 20px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
 
-        .workspace-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            flex: 1;
-            min-height: 550px;
-        }
+  /* ── REPORTING VERBS TABLE ── */
+  .rv-table thead { background: #92400e; }
+  .rv-table tbody tr:nth-child(odd)  { background: var(--amber-lt); }
+  .rv-table tbody tr:nth-child(even) { background: var(--white); }
+  .rv-sym {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: var(--blue);
+    direction: ltr;
+    font-style: italic;
+  }
+  .rv-sol { font-weight: 700; color: var(--green); }
 
-        @media (max-width: 900px) {
-            .workspace-container {
-                grid-template-columns: 1fr;
-            }
-        }
+  /* ── GROUP CARDS ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .card {
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 1.5px solid var(--border);
+    background: white;
+  }
+  .card .card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    opacity: 0.6;
+  }
+  .card .verbs {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    color: var(--blue);
+    margin-bottom: 10px;
+    font-weight: 500;
+    direction: ltr;
+    text-align: left;
+  }
+  .card .solution {
+    font-size: 0.88rem;
+    color: var(--green);
+    font-weight: 600;
+  }
+  .card .card-note {
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--amber);
+    background: var(--amber-lt);
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
 
-        .workspace-panel {
-            background: var(--surface);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to left, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
 
-        .panel-header {
-            padding: 12px 18px;
-            border-bottom: 1px solid var(--border);
-            background: linear-gradient(135deg, var(--teal-50) 0%, rgba(255,255,255,0) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+  /* ── TIPS GRID ── */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .tip-card {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .tip-card h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--slate);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .tip-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .tip-card ul li {
+    font-size: 0.87rem;
+    color: var(--slate);
+    padding: 4px 0;
+    padding-right: 14px;
+    position: relative;
+  }
+  .tip-card ul li::before {
+    content: "-";
+    position: absolute;
+    right: 0;
+    color: var(--blue);
+    font-weight: 700;
+  }
 
-        .panel-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--teal-950);
-        }
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 32px;
+    color: var(--slate);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    background: white;
+  }
 
-        .panel-body {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        textarea {
-            width: 100%;
-            flex: 1;
-            min-height: 340px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 12px;
-            font-size: 13px;
-            line-height: 1.8;
-            resize: none;
-            background: #fafcfc;
-            color: var(--text);
-            outline: none;
-            transition: var(--tr);
-            font-family: monospace;
-            text-align: right;
-        }
-        textarea:focus {
-            border-color: var(--teal-500);
-            background: #fff;
-        }
-
-        .interactive-workspace-area {
-            border: 2px dashed var(--border);
-            border-radius: var(--radius-sm);
-            padding: 15px;
-            background: #fafcfc;
-            flex: 1;
-            overflow-y: auto;
-            max-height: 420px;
-        }
-
-        .cloze-paragraph-block {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 12px;
-            line-height: 2;
-            font-size: 14px;
-            text-align: right;
-        }
-
-        .cloze-word {
-            cursor: pointer;
-            padding: 1px 4px;
-            margin: 0 1px;
-            border-radius: 3px;
-            transition: all 0.15s ease;
-            display: inline-block;
-        }
-        .cloze-word:hover {
-            background: var(--teal-100);
-            color: var(--teal-900);
-        }
-
-        .cloze-word.hidden-cloze {
-            background: var(--gold);
-            color: white;
-            font-weight: bold;
-            border-bottom: 2px solid #b38210;
-            box-shadow: 0 2px 5px rgba(201, 153, 26, 0.3);
-        }
-
-        .helper-text {
-            font-size: 11px;
-            color: var(--teal-700);
-            margin-bottom: 10px;
-            font-weight: 600;
-            text-align: right;
-        }
-
-        .empty-state-text {
-            color: var(--text-3);
-            text-align: center;
-            font-style: italic;
-            padding-top: 40px;
-            font-size: 12px;
-        }
-
-        .counter-badge {
-            background: var(--teal-50);
-            border: 1px solid var(--teal-100);
-            color: var(--teal-800);
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .status-message {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-2);
-            background: rgba(0, 0, 0, 0.03);
-            border-radius: 6px;
-            padding: 8px 12px;
-            margin: 12px 0;
-            text-align: center;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 20px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--tr);
-            font-family: var(--font-body);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--teal-700), var(--teal-600));
-            color: white;
-            width: 100%;
-            box-shadow: 0 3px 10px rgba(13, 100, 104, .2);
-        }
-        .btn-primary:hover { transform: translateY(-1px); background: var(--teal-800); }
-        .btn-sm { padding: 6px 12px; font-size: 11px; }
-        .btn-accent { background: var(--gold); color: white; }
-        .btn-accent:hover { background: #b38210; }
-
-        .form-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-2);
-            margin-bottom: 5px;
-            display: block;
-            text-align: right;
-        }
-
-        /* قسم التوقيع في الأسفل والمعدل بناء على طلب المستخدمة */
-        .signature {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            color: var(--text-3);
-        }
-        .sig-label {
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 4px;
-        }
-        .sig-name {
-            font-size: 14px;
-            color: var(--gold);
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        .sig-user {
-            font-size: 11px;
-            color: var(--teal-600);
-            font-weight: 600;
-            margin-top: 4px;
-            font-style: italic;
-            letter-spacing: 0.5px;
-        }
-        .sig-sub {
-            font-size: 9px;
-            margin-top: 2px;
-        }
-    </style>
+  @media (max-width: 600px) {
+    .site-header h1 { font-size: 1.6rem; }
+    .list-grid { grid-template-columns: 1fr; }
+    .toc { display: none; }
+  }
+</style>
 </head>
 <body>
 
-<div class="site-banner">
-    <img src="https://i.postimg.cc/PvbXdSPg/logo.png" alt="AMAD" class="banner-logo">
-    <div class="banner-text">
-        <div class="banner-title">AMAD <span>Cloze</span> Generator</div>
-        <div class="banner-tagline">Advanced Cloze Deletion Tool</div>
-    </div>
-    <div class="banner-badge"><span class="pulse-dot"></span> Single-Format Text Export</div>
-</div>
+<header class="site-header">
+  <h1>ملتقى التوجيهي - انجليزي متقدم</h1>
+  <p class="sub">ملخص شامل للمادة | 2008 / 2009</p>
+  <p class="meta">بناء على تعليقات د. خالد الدعجة - دورة المكثف المتقدم</p>
+</header>
 
-<div class="main-content">
-    <div class="top-bar">
-        <div class="breadcrumb">AMAD <span class="sep">›</span> <b>Cloze Flashcard Editor</b></div>
-        <span class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">🌓</span>
+<nav class="toc">
+  <a href="#literature">الادب</a>
+  <a href="#grammar">القواعد</a>
+  <a href="#stative">افعال الثبات</a>
+  <a href="#reporting">افعال التقرير</a>
+  <a href="#tips">توجيهات عامة</a>
+</nav>
+
+<main class="container">
+
+  <!-- ===== SECTION 1: LITERATURE ===== -->
+  <section class="section" id="literature">
+    <div class="section-title blue">
+      <div class="num"><span>1</span></div>
+      <h2>الادب (Literature)</h2>
     </div>
 
-    <div class="workspace-container">
-        
-        <!-- الشاشة اليسرى: شاشة العمل التفاعلية -->
-        <div class="workspace-panel interactive-panel">
-            <div class="panel-header">
-                <div class="panel-title">🎯 1. شاشة التحديد والإخفاء التفاعلي</div>
-                <button class="btn btn-sm btn-accent" id="loadTextBtn">🔄 سحب النصوص وتجهيزها</button>
-            </div>
-            <div class="panel-body">
-                <div class="helper-text">💡 انقري على أي كلمة في الفقرات أدناه لإخفائها فوراً وتحويلها إلى بطاقة كلوز!</div>
-                <div id="interactiveWorkspace" class="interactive-workspace-area">
-                    <div class="empty-state-text">يرجى كتابة أو لصق النصوص في الشاشة اليمين أولاً، ثم الضغط على "سحب النصوص" للبدء بالإخفاء التفاعلي.</div>
-                </div>
-            </div>
+    <h3 class="sub-title blue">الاساليب البلاغية</h3>
+
+    <div class="note blue">
+      <strong>Simile - التشبيه</strong>
+      عند وجود كلمة <code>like</code> او <code>so</code> في الجملة مع مقارنة بين شيئين.
+    </div>
+    <div class="note green">
+      <strong>Metaphor - الاستعارة</strong>
+      مقارنة بين شيئين دون استخدام <code>like</code> او <code>so</code>.
+    </div>
+
+    <div class="cards" style="margin-top:24px;">
+      <div class="card">
+        <div class="card-title" style="color:var(--blue)">Alliteration - الجناس</div>
+        <ul class="list blue">
+          <li>تكون في بداية الكلمات فقط</li>
+          <li>اي صوت يصلح</li>
+          <li>يجب ان تكون في نفس السطر</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--violet)">Sibilance - الاصوات الصفيرية</div>
+        <ul class="list violet">
+          <li>ليس شرطا ان تكون في اول الكلمات</li>
+          <li>مرتبطة باصوات: s / sh / ch</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--amber)">Onomatopoeia - المحاكاة الصوتية</div>
+        <div style="font-size:0.9rem;color:var(--amber);margin-bottom:8px;">الكلمتان الواردتان في المادة فقط:</div>
+        <div class="verbs" style="font-family:'Fira Code',monospace;color:var(--amber);font-size:1rem;font-weight:700;">Swish &nbsp;&nbsp; Purring</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ===== SECTION 2: GRAMMAR ===== -->
+  <section class="section" id="grammar">
+    <div class="section-title green">
+      <div class="num"><span>2</span></div>
+      <h2>القواعد (Grammar) - الوحدة الاولى</h2>
+    </div>
+
+    <p style="font-size:0.95rem;color:var(--slate);margin-bottom:16px;">
+      الجمل المهمة من قواعد الوحدة الاولى حسب د. خالد الدعجة:
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:55%;text-align:left;">الجملة</th>
+            <th style="width:45%;">الوظيفة (Function)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="sentence">We're becoming tired of the boy's lies.</td>
+            <td class="func">Changes and developments</td>
+          </tr>
+          <tr>
+            <td class="sentence">She is always disturbing me when I'm on the phone.</td>
+            <td class="func">Expressing annoyance</td>
+          </tr>
+          <tr>
+            <td class="sentence">This time last year I was painting my bedroom.</td>
+            <td class="func">Actions in progress at a specific time in the past</td>
+          </tr>
+          <tr>
+            <td class="sentence">The water was pouring down the side of the bath.</td>
+            <td class="func">Actions in progress at a specific time in the past</td>
+          </tr>
+          <tr>
+            <td class="sentence">She was doing a quiz when her boss walked into the room.</td>
+            <td class="func">Longer actions interrupted by a shorter past action</td>
+          </tr>
+          <tr>
+            <td class="sentence">Six months from now we'll be starting in different cities.</td>
+            <td class="func">Predict something in progress at a point in the future</td>
+          </tr>
+          <tr>
+            <td class="sentence">
+              <span class="badge">وزاري</span>
+              This time tomorrow, I'll be flying over the Atlantic.
+            </td>
+            <td class="func">Predict something in progress at a point in the future</td>
+          </tr>
+          <tr>
+            <td class="sentence">Will you be coming to the meeting after the show?</td>
+            <td class="func">Ask politely about someone's plans</td>
+          </tr>
+          <tr>
+            <td class="sentence">We've recently discovered a fabulous new restaurant.</td>
+            <td class="func">Recent actions with a present result</td>
+          </tr>
+          <tr>
+            <td class="sentence">I can't exercise because I've broken my leg.</td>
+            <td class="func">Recent actions with a present result</td>
+          </tr>
+          <tr>
+            <td class="sentence">Adnan's published a book about horses.</td>
+            <td class="func">Recent actions - focus on the result, not the activity</td>
+          </tr>
+          <tr>
+            <td class="sentence">She'd bought lots of apples the night before...</td>
+            <td class="func">Actions or states that happened before a specific past time</td>
+          </tr>
+          <tr>
+            <td class="sentence">As soon as I'd heard the news, I went round to their house.</td>
+            <td class="func">Clear sequence of events; Past Perfect for the earlier action</td>
+          </tr>
+          <tr>
+            <td class="sentence">Next time I see you, you will have changed your eating habits!</td>
+            <td class="func">Action completed before a particular time in the future</td>
+          </tr>
+          <tr>
+            <td class="sentence">Next time I see you, I will have had my hair cut short.</td>
+            <td class="func">Action completed before a particular time in the future</td>
+          </tr>
+          <tr>
+            <td class="sentence">I've been sending off job applications.</td>
+            <td class="func">Focus on continuity of recent actions (activity, not result)</td>
+          </tr>
+          <tr>
+            <td class="sentence">He'd been sitting there for hours. It was time to go.</td>
+            <td class="func">Continuous actions before a specific time in the past</td>
+          </tr>
+          <tr>
+            <td class="sentence">I had been keeping quiet about my running, then I won the race.</td>
+            <td class="func">Continuous actions before a specific time in the past</td>
+          </tr>
+          <tr>
+            <td class="sentence">I have been going to bed too late recently.</td>
+            <td class="func">Habitual action - started recently and still ongoing</td>
+          </tr>
+          <tr>
+            <td class="sentence">Recently, I have been running five kilometres every day.</td>
+            <td class="func">Habitual action - started recently and still ongoing</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note amber" style="margin-top:16px;">
+      تنبيه: جملة "This time tomorrow, I'll be flying over the Atlantic" تكررت في الوزاري - احفظها جيدا.
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ===== SECTION 3: STATIVE VERBS ===== -->
+  <section class="section" id="stative">
+    <div class="section-title violet">
+      <div class="num"><span>3</span></div>
+      <h2>افعال الثبات والاستمرارية</h2>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+      <div>
+        <h3 class="sub-title violet">افعال الثبات - Stative Verbs</h3>
+        <div class="note violet" style="margin-bottom:12px;font-size:0.85rem;">
+          معانيها تدل على افعال لحظية - غالبا لا تاتي بصيغة الاستمرارية
         </div>
-
-        <!-- الشاشة اليمنى: شاشة مدخلات ومخرجات النصوص الأساسية -->
-        <div class="workspace-panel main-text-panel">
-            <div class="panel-header">
-                <div class="panel-title">📝 2. النصوص البرمجية والبطاقات</div>
-                <span class="counter-badge" id="cardCount">0 بطاقات مكتشفة</span>
-            </div>
-            <div class="panel-body">
-                <label class="form-label">اكتبي أو الصقي النصوص هنا (كل فقرة تفصل بينها مسافة فارغة تعتبر بطاقة منفصلة):</label>
-                <textarea id="rawText" placeholder="اكتبي الفقرات هنا...&#10;&#10;مثال:&#10;تتكون العظام في جسم الإنسان من نسيج ضام متخصص.&#10;&#10;الفقرة الثانية تفصلها مسافة فارغة لتصبح بطاقة ثانية تلقائياً."></textarea>
-
-                <div class="status-message" id="statusBox">المولد جاهز لاستقبال النصوص.</div>
-
-                <div class="btn-row">
-                    <button class="btn btn-primary" id="exportTxtBtn">📦 تصدير ملف أنكي النصي (.txt)</button>
-                </div>
-            </div>
+        <ul class="list violet">
+          <li>be</li>
+          <li>hear</li>
+          <li>leave</li>
+          <li>start</li>
+          <li>comprehend</li>
+          <li>conceive</li>
+          <li>notice</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="sub-title green">افعال الاستمرارية - Dynamic Verbs</h3>
+        <div class="note green" style="margin-bottom:12px;font-size:0.85rem;">
+          تناسب الازمنة المستمرة ويمكن اضافة ing اليها
         </div>
-
+        <ul class="list green">
+          <li>wait</li>
+          <li>sit</li>
+          <li>drive</li>
+          <li>cook</li>
+          <li>run</li>
+          <li>talk</li>
+          <li>walk</li>
+        </ul>
+      </div>
     </div>
 
-    <!-- التوقيع المحدث متضمناً اسم Toqa بخط صغير أنيق بالإنجليزية -->
-    <div class="signature">
-        <div class="sig-label">Designed by</div>
-        <div class="sig-name">© AMAD TEAM 2026</div>
-        <div class="sig-user">Toqa Almushriqi</div>
-        <div class="sig-sub">Optimized Cloze Deletion Generator</div>
+    <h3 class="sub-title violet">ملاحظات مهمة</h3>
+    <div class="note blue">
+      <strong>ملاحظة 1</strong>
+      الفعل <code>feel</code> هذه السنة مسموح ان يأتي بصيغة الاستمرارية.
     </div>
-</div>
+    <div class="note green">
+      <strong>ملاحظة 2</strong>
+      الافعال التي معناها يدل على اللحظية ليست بالضرورة افعال ثبات، لكن كليهما مشتركان في شيء واحد: غالبا لا يضاف اليهم ing.
+    </div>
+    <div class="note amber">
+      <strong>ملاحظة 3</strong>
+      افعال الاستمرارية تناسب الازمنة المستمرة، اما الافعال اللحظية فغالبا تاتي مع الازمنة البسيطة او التامة.
+    </div>
+  </section>
 
-<script>
-(function() {
-    const rawTextArea = document.getElementById('rawText');
-    const loadTextBtn = document.getElementById('loadTextBtn');
-    const interactiveWorkspace = document.getElementById('interactiveWorkspace');
-    const exportTxtBtn = document.getElementById('exportTxtBtn');
-    const cardCountSpan = document.getElementById('cardCount');
-    const statusBox = document.getElementById('statusBox');
+  <div class="divider"></div>
 
-    let paragraphData = [];
+  <!-- ===== SECTION 4: REPORTING VERBS ===== -->
+  <section class="section" id="reporting">
+    <div class="section-title amber">
+      <div class="num"><span>4</span></div>
+      <h2>افعال التقرير (Reporting Verbs)</h2>
+    </div>
 
-    window.toggleDarkMode = function() {
-        const isDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('amad_cloze_single_dark', isDark);
-    };
-    if (localStorage.getItem('amad_cloze_single_dark') === 'true') {
-        document.body.classList.add('dark-mode');
-    }
+    <!-- Group 1 -->
+    <h3 class="sub-title amber">القسم الاول - الافعال المكررة (لها طريقتان للحل)</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-title" style="color:var(--blue)">المجموعة 1 - الوعد والاخبار والتذكير</div>
+        <div class="verbs">Promised / Told / Reminded</div>
+        <div class="solution">الحل: obj + to &nbsp;|&nbsp; obj + that</div>
+        <div class="card-note">Promised يأتي بدون obj</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--green)">المجموعة 2 - الاقتراحات</div>
+        <div class="verbs">Suggested / Recommended / Proposed</div>
+        <div class="solution">الحل: should &nbsp;|&nbsp; ing</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--amber)">المجموعة 3 - الاصرار والطلب</div>
+        <div class="verbs">Requested / Insisted</div>
+        <div class="solution">مشتركتان في: should</div>
+        <div class="card-note">لكل فعل طريقة ثانية - احفظها بالاضافة الى: Explained و Asked</div>
+      </div>
+    </div>
 
-    loadTextBtn.addEventListener('click', function() {
-        const text = rawTextArea.value.trim();
-        if (!text) {
-            statusBox.textContent = "⚠️ يرجى إدخال أي نصوص في الشاشة اليمين أولاً.";
-            return;
-        }
+    <!-- Group 2 -->
+    <h3 class="sub-title amber" style="margin-top:32px;">القسم الثاني - الافعال المذكورة مرة واحدة</h3>
 
-        const paragraphs = text.split(/
-\s*
-/).map(p => p.trim()).filter(p => p.length > 0);
-        paragraphData = [];
-        interactiveWorkspace.innerHTML = "";
+    <div class="table-wrap">
+      <table class="rv-table">
+        <thead>
+          <tr>
+            <th>المجموعة</th>
+            <th>الرمز</th>
+            <th>طريقة الحل</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:700;color:var(--amber)">المجموعة 1</td>
+            <td class="rv-sym">CCPS</td>
+            <td class="rv-sol">that</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;color:var(--amber)">المجموعة 2</td>
+            <td class="rv-sym">I</td>
+            <td class="rv-sol">obj + that</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;color:var(--amber)">المجموعة 4</td>
+            <td class="rv-sym">D</td>
+            <td class="rv-sol">should</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;color:var(--amber)">المجموعة 5</td>
+            <td class="rv-sym">O</td>
+            <td class="rv-sol">to</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;color:var(--amber)">المجموعة 6</td>
+            <td class="rv-sym">Advise + Or-Pe-Cv</td>
+            <td class="rv-sol">obj + to</td>
+          </tr>
+          <tr>
+            <td style="font-weight:700;color:var(--amber)">المجموعة 7</td>
+            <td class="rv-sym">RA</td>
+            <td class="rv-sol">Gerund (ing)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note blue" style="margin-top:12px;">
+      لماذا لا توجد مجموعة رقم 3؟ لانها في الدوسية خاصة بالسؤال والكل يحفظها.
+    </div>
 
-        paragraphs.forEach((para, pIdx) => {
-            const words = para.split(/(\s+)/);
-            paragraphData.push({
-                originalWords: words,
-                clozeIndices: new Set()
-            });
+    <h3 class="sub-title amber" style="margin-top:28px;">القسم الثالث - افعال حروف الجر</h3>
+    <div class="note green">
+      هذه الافعال تعتمد على حرف الجر - احفظها بنفسك لان كل فعل له حرف جر خاص به.
+    </div>
+  </section>
 
-            const paraBlock = document.createElement('div');
-            paraBlock.className = 'cloze-paragraph-block';
-            paraBlock.innerHTML = `<div style="font-size:10px; color:var(--text-3); margin-bottom:4px; text-align:right;">البطاقة رقم [${pIdx + 1}]</div>`;
+  <div class="divider"></div>
 
-            words.forEach((word, wIdx) => {
-                if (word.trim().length === 0) {
-                    paraBlock.appendChild(document.createTextNode(word));
-                } else {
-                    const wordSpan = document.createElement('span');
-                    wordSpan.className = 'cloze-word';
-                    wordSpan.textContent = word;
-                    wordSpan.dataset.pidx = pIdx;
-                    wordSpan.dataset.widx = wIdx;
+  <!-- ===== SECTION 5: TIPS ===== -->
+  <section class="section" id="tips">
+    <div class="section-title slate">
+      <div class="num"><span>5</span></div>
+      <h2>توجيهات وتنبيهات عامة</h2>
+    </div>
 
-                    wordSpan.addEventListener('click', function() {
-                        const currentP = parseInt(this.dataset.pidx);
-                        const currentW = parseInt(this.dataset.widx);
+    <div class="tips-grid">
+      <div class="tip-card">
+        <h4>القطع - Reading</h4>
+        <ul>
+          <li>القطع نوعها "ضع دائرة" - كل سؤال من فقرة مختلفة</li>
+          <li>ادرسوا كل القطع او على الاقل ترجموها واقرأوها</li>
+          <li>لا تنسوا قطع الكتابة (Writing) وقطع المراجعات</li>
+        </ul>
+      </div>
+      <div class="tip-card">
+        <h4>Life Skills</h4>
+        <ul>
+          <li>قراءتها مفيدة وفيها افكار وليست صعبة</li>
+          <li>حوالي 4 عناوين في كامل المادة</li>
+        </ul>
+      </div>
+      <div class="tip-card">
+        <h4>تمارين الكتاب</h4>
+        <ul>
+          <li>مستحيل يكون في خروج عن نمط الكتاب</li>
+          <li>الحلول موجودة على موقع المركز الوطني لتطوير المناهج</li>
+        </ul>
+      </div>
+    </div>
 
-                        if (paragraphData[currentP].clozeIndices.has(currentW)) {
-                            paragraphData[currentP].clozeIndices.delete(currentW);
-                            this.classList.remove('hidden-cloze');
-                        } else {
-                            paragraphData[currentP].clozeIndices.add(currentW);
-                            this.classList.add('hidden-cloze');
-                        }
-                        
-                        syncDataToTextArea();
-                    });
+    <div class="note blue" style="margin-top:24px;font-size:1rem;">
+      <strong>نصيحة ذهبية</strong>
+      احفظوا السؤال الذي تتعلقون عنده - لو حفظتموه جيدا ستتقنون الاجابة عليه.
+    </div>
+  </section>
 
-                    paraBlock.appendChild(wordSpan);
-                }
-            });
+</main>
 
-            interactiveWorkspace.appendChild(paraBlock);
-        });
-
-        cardCountSpan.textContent = `${paragraphs.length} بطاقات مكتشفة`;
-        statusBox.textContent = "✅ تم تحميل النصوص! انقري الآن على الكلمات المراد إخفاؤها من الشاشة اليسرى.";
-    });
-
-    function syncDataToTextArea() {
-        let finalOutputText = "";
-
-        paragraphData.forEach((para, pIdx) => {
-            let paraText = "";
-            let clozeCounter = 1;
-
-            para.originalWords.forEach((word, wIdx) => {
-                if (para.clozeIndices.has(wIdx)) {
-                    paraText += `{{c${clozeCounter}::${word}}}`;
-                    clozeCounter++;
-                } else {
-                    paraText += word;
-                }
-            });
-
-            finalOutputText += paraText + "\n\n";
-        });
-
-        rawTextArea.value = finalOutputText.trim();
-    }
-
-    exportTxtBtn.addEventListener('click', function() {
-        const text = rawTextArea.value.trim();
-        if (!text) {
-            statusBox.textContent = "⚠️ لا توجد بيانات لتصديرها. يرجى إضافة نصوص أولاً.";
-            return;
-        }
-
-        const paragraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 0);
-        let fileContent = "";
-
-        paragraphs.forEach((para) => {
-            let cleanLine = para.replace(/\t/g, " ").replace(/\n/g, "<br>");
-            fileContent += `${cleanLine}\t\n`;
-        });
-
-        const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
-        const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-        const filename = `AMAD_Cloze_Anki_${timestamp}.txt`;
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        statusBox.textContent = `🎉 بنجاح! تم تصدير ${paragraphs.length} بطاقة كلوز داخل الملف: ${filename}`;
-    });
-})();
-</script>
+<footer>
+  ملتقى التوجيهي - انجليزي متقدم | 2008
+</footer>
 
 </body>
 </html>
